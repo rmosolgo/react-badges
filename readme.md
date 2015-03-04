@@ -13,3 +13,4 @@ The interesting parts are:
   - Then get a new data URI (for a PNG) from the canvas ([src](https://github.com/rmosolgo/react-badges/blob/master/index.html#L50))
 - you have to escape SVG before making into a data URI ([src](https://github.com/rmosolgo/react-badges/blob/master/index.html#L8))
 - some parts of SVG weren't supported by React, so I had to sub them in manually ([src](https://github.com/rmosolgo/react-badges/blob/master/index.html#L37-L39))
+- the SVG is actually hidden -- it's just used as a reference to generate the PNG ([src](https://github.com/rmosolgo/react-badges/blob/gh-pages/index.html#L76-L81))
