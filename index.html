@@ -1,0 +1,250 @@
+<html>
+  <head>
+    <link rel='stylesheet' type='text/css' href="https://netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.12.2/JSXTransformer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.12.2/react.js"></script>
+    <script type='text/jsx;harmony=true'>
+      var svgToDataURI = function (svgMarkup) {
+        return 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svgMarkup)))
+      }
+
+      var DEMO_BADGES = [
+        {color: "#00D8FF", leftText: "built with", rightText: "love"},
+        {color: "#44cc11", leftText: "power level", rightText: "> 9000"},
+        {color: "#b1816d", leftText: "powered by", rightText: "coffee"},
+        {color: "#eedd00", leftText: "uptime", rightText: "60%-ish"},
+        {color: "#ff3b2f", leftText: "code climate", rightText: "grim"},
+      ]
+
+      var App = React.createClass({
+        getInitialState: function() {
+          var startBadge = DEMO_BADGES[Math.floor(Math.random() * DEMO_BADGES.length)]
+          return {
+            color: startBadge.color,
+            leftText: startBadge.leftText,
+            rightText: startBadge.rightText,
+            scale: 1,
+            style: "plastic",
+            svgMarkup: null,
+            dataURI: null,
+          }
+        },
+        componentDidMount: function() {
+          this.getSvgMarkup()
+        },
+        getSvgMarkup: function() {
+          var badge = this.refs.badge.getDOMNode()
+          var svgMarkup = badge.outerHTML
+            .replace(/<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" contentstyletype="text/css"')
+            .replace(/<linearGradient/, '<linearGradient xmlns:xlink="http://www.w3.org/1999/xlink" xlink:show="other" xlink:type="simple" xlink:actuate="onLoad"')
+          var svgDataURI = svgToDataURI(svgMarkup)
+          var image = document.createElement("img")
+          image.src = svgDataURI
+          var _this = this
+          image.onload = function() {
+            var canvas = document.createElement("canvas")
+            canvas.height = image.height
+            canvas.width = image.width
+            var context = canvas.getContext('2d')
+            context.drawImage(image, 0, 0)
+            var pngDataURI = canvas.toDataURL("image/png")
+            _this.setState({
+              svgMarkup: svgMarkup,
+              dataURI: pngDataURI,
+            })
+          }
+        },
+        render: function() {
+          var badgeProps = {
+            color: this.state.color,
+            leftText: this.state.leftText,
+            rightText: this.state.rightText,
+            onTextLengthChanged: this.getSvgMarkup,
+            scale: this.state.scale,
+            style: this.state.style,
+          }
+
+          return (
+            <div className='container'>
+              <div className='row'>
+                <div className='col-md-12'>
+                  <h1 className='page-header'>Badge</h1>
+                </div>
+              </div>
+              <div className='row'>
+                <div className='col-md-6'>
+                  <div className='row text-center' style={{padding: 10}}>
+                    <div style={{position: "absolute", top: -1999}}>
+                      <App.Badge ref='badge' {...badgeProps}/>
+                    </div>
+                    <img src={this.state.dataURI} />
+                  </div>
+                  <div className='row form-group'>
+                    <div className='col-sm-12'>
+                      <a className='btn btn-primary btn-block' href={this.state.dataURI} download={this.state.leftText + ": " + this.state.rightText}>
+                        Download
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div className='col-md-6'>
+                  <div className='row'>
+                    <div className='col-sm-6 form-group'>
+                      <input className='form-control' type='text' value={this.state.leftText} onChange={this.handleStateChange.bind(null, "leftText")}/>
+                    </div>
+                    <div className='col-sm-6 form-group'>
+                      <input className='form-control' type='text' value={this.state.rightText} onChange={this.handleStateChange.bind(null, "rightText")}/>
+                    </div>
+                  </div>
+                  <div className='row'>
+                    <div className='col-sm-4 form-group'>
+                      <div className='radio'>
+                        <label>
+                          <input type='radio' name='style' value='plastic' checked={this.state.style == 'plastic'} onChange={this.handleStateChange.bind(null, 'style')} />
+                          plastic
+                        </label>
+                      </div>
+                      <div className='radio'>
+                        <label>
+                          <input type='radio' name='style' value='rounded' checked={this.state.style == 'rounded'} onChange={this.handleStateChange.bind(null, 'style')} />
+                          rounded
+                        </label>
+                      </div>
+                      <div className='radio'>
+                        <label>
+                          <input type='radio' name='style' value='square' checked={this.state.style == 'square'} onChange={this.handleStateChange.bind(null, 'style')} />
+                          square
+                        </label>
+                      </div>
+                    </div>
+                    <div className='col-sm-4 text-center form-group'>
+                      <label>scale</label>
+                      <input type='range' value={this.state.scale} min={0.01} max={2} step={0.01} onChange={this.handleStateChange.bind(null, "scale")}/>
+                    </div>
+                    <div className='col-sm-4 text-center form-group'>
+                      <label>color</label>
+                      <div>
+                        <input type='color' value={this.state.color} onChange={this.
+                          handleStateChange.bind(null, "color")}/>
+                      </div>
+                      <code>{this.state.color}</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className='row'>
+                <div className='col-md-12'>
+                  <p className='text-muted text-center'>
+                    To use this image on Github, paste it into a new issue or comment, then copy the resulting Markdown code into your readme.
+                  </p>
+                  <p>
+                    <b>Chrome or Firefox</b> only!
+                    <a href='https://github.com/rmosolgo/react-badges' target='_blank'>Source on github.</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )
+        },
+        handleStateChange: function(keyName, ev) {
+          var newState = {}
+          newState[keyName] = ev.target.value
+          var _this = this
+          this.setState(newState, function() {
+            _this.getSvgMarkup()
+          })
+        },
+      })
+
+      App.Badge = React.createClass({
+        getDefaultProps: function(){
+          return {
+            scale: 1,
+          }
+        },
+        getInitialState: function() {
+          return {
+            leftWidth: 0,
+            rightWidth: 0,
+          }
+        },
+        componentDidMount: function() {
+          this.updateTextLength()
+        },
+        componentDidUpdate: function() {
+          this.updateTextLength()
+        },
+        updateTextLength: function() {
+          var leftText = this.refs.leftText.getDOMNode()
+          var leftTextLength = Math.round(leftText.getComputedTextLength())
+          var rightText = this.refs.rightText.getDOMNode()
+          var rightTextLength = Math.round(rightText.getComputedTextLength())
+
+          if (leftTextLength !== this.state.leftWidth || rightTextLength !== this.state.rightWidth) {
+            var _this = this
+            this.setState({
+              leftWidth: leftTextLength,
+              rightWidth: rightTextLength
+            }, function() {
+              _this.props.onTextLengthChanged()
+            } )
+          }
+        },
+        render: function() {
+          var minorMargin = 1 * this.props.scale
+          var majorMargin = 5 * this.props.scale
+          var textMargin = minorMargin + majorMargin
+          var fullWidth = (textMargin * 4) + (this.state.leftWidth + this.state.rightWidth)
+          var rightOffset = (textMargin * 2) + (this.state.leftWidth)
+          var rightWidth = (textMargin * 2) + (this.state.rightWidth)
+          var height = 20 * this.props.scale
+          var textSize = 11 * this.props.scale
+          var borderRadius = 3 * this.props.scale * (this.props.style == 'square' ? 0 : 1)
+          return (
+            <svg
+              height={height}
+              width={fullWidth}
+              contentscripttype="text/ecmascript"
+              zoomAndPan="magnify"
+              contentstyletype="text/css"
+              preserveAspectRatio="xMidYMid meet"
+              xmlns="http://www.w3.org/2000/svg"
+              version="1.0"
+            >
+                <linearGradient id="a" x2='0' y2={this.props.style == 'plastic' ? '100%' : '0'}>
+                    <stop stopOpacity=".1" stopColor="#bbb" offset="0"/>
+                    <stop stopOpacity=".1" offset="1"/>
+                </linearGradient>
+
+                <rect rx={borderRadius} fill="#555" width={fullWidth} height={height}/>
+                <rect rx={borderRadius} fill={this.props.color} width={rightWidth} x={rightOffset} height={height}/>
+                <rect fill={this.props.color} x={rightOffset} width="13" height={height}/>
+                <rect rx={borderRadius} fill="url(#a)" width={fullWidth}  height={height}/>
+
+                <g fontSize={textSize} fontFamily="DejaVu Sans,Verdana,Geneva,sans-serif"
+                   fill="#fff">
+                    <text ref='leftText' x={textMargin} fill="#010101" fillOpacity=".3" y={height - majorMargin}>
+                      {this.props.leftText}
+                    </text>
+                    <text x={textMargin} y={height - majorMargin - minorMargin}>
+                      {this.props.leftText}
+                    </text>
+                    <text ref='rightText' fill="#010101" x={rightOffset + textMargin} fillOpacity=".3" y={height - majorMargin}>
+                      {this.props.rightText}
+                    </text>
+                    <text x={rightOffset + textMargin} y={height - majorMargin - minorMargin}>
+                      {this.props.rightText}
+                    </text>
+                </g>
+            </svg>
+          )
+        }
+      })
+
+      React.render(<App />, document.querySelector("#app"))
+    </script>
+  </head>
+  <body>
+    <div id='app'></div>
+  </body>
+</html>
